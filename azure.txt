@@ -1,0 +1,28 @@
+az login
+az acr login --name <acr_name>
+docker tag <image_name>:<tag> <acr_name>.azurecr.io/<image_name>:<tag>
+docker push <acr_name>.azurecr.io/<image_name>:<tag>
+
+
+
+stages:
+  - build
+  - push
+
+variables:
+  ACR_SERVER: "acrconreg.azurecr.io"
+  ACR_USERNAME: "acrconreg"
+  ACR_PASSWORD: "$acrconreg"  # Use GitLab CI/CD variable
+  IMAGE_NAME: "hello-world"
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME .
+    - docker login $ACR_SERVER -u $ACR_USERNAME -p $ACR_PASSWORD
+    - docker tag $IMAGE_NAME $ACR_SERVER/$IMAGE_NAME
+
+push:
+  stage: push
+  script:
+    - docker push $ACR_SERVER/$IMAGE_NAME
